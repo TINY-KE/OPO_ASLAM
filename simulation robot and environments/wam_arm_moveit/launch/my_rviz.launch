@@ -1,0 +1,17 @@
+<!-- 
+(1)仿真环境怎么启动
+(2)修改各控制器 所在的package名
+(3)创建moveit控制器的launch文件: moveit_planning_execution.launch
+-->
+
+<launch>
+
+    
+    <!-- Run Rviz and load the default config to see the state of the move_group node -->
+    <include file="$(find wam_arm_moveit)/launch/moveit_rviz.launch">
+        <!-- <arg name="rviz_config" value="$(find wam_arm_moveit)/launch/moveit.rviz"/> -->
+        <arg name="rviz_config" value="/home/robotlab/vp3d.rviz"/>
+    </include>
+
+
+</launch>

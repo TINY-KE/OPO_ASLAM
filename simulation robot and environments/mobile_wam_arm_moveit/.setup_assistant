@@ -1,0 +1,11 @@
+moveit_setup_assistant_config:
+  URDF:
+    package: barrett_model
+    relative_path: robots/mobile_7dof_wam_kinectv1.urdf.xacro
+    xacro_args: ""
+  SRDF:
+    relative_path: config/wam.srdf
+  CONFIG:
+    author_name: zhjd
+    author_email: 1@1.com
+    generated_timestamp: 1726257231

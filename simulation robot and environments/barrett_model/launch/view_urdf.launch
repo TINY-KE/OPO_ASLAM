@@ -1,0 +1,17 @@
+<launch>
+
+  
+
+
+  <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find barrett_model)/robots/mobile_7dof_wam_kinectv1.urdf.xacro'" /> 
+  <!-- 启动Gazebo中的ROS控制器管理器 -->
+  <!-- $(find barrett_model)/robots/mobile_7dof_wam_kinectv1.urdf.xacro -->
+  <!-- <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-urdf -model my_robot -file /path/your/model.urdf" respawn="false"/> -->
+  <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-urdf -model wam -param robot_description" respawn="false"/>
+
+</launch>
+
+
+   <!-- 
+    roslaunch barrett_model view_urdf.launch  
+    -->

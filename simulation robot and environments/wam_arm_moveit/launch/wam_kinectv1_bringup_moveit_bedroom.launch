@@ -1,0 +1,113 @@
+<!-- 
+(1)仿真环境怎么启动
+(2)修改各控制器 所在的package名
+(3)创建moveit控制器的launch文件: moveit_planning_execution.launch
+-->
+
+<launch>
+
+<!-- By default, we won't load or override the robot_description in movegroup-->
+    <arg name="load_robot_description" default="false"/>
+
+  
+<!-- (1)启动gazebo仿真环境: launch the gazebo simulator and spawn the robot -->
+    <!-- 设置Gazebo specific options  -->
+    <!-- <arg name="world_name" value="$(find barrett_model)/world/nine_highdesk_1.world"/>     -->
+    <arg name="world_name" value="$(find barrett_model)/world/bedroom.world"/>  
+    <arg name="paused" default="false"/>
+    <arg name="use_sim_time" default="true"/>
+    <arg name="gui" default="true"/>
+    <arg name="headless" default="false"/>
+    <arg name="debug" default="false"/>
+    <!-- 运行gazebo仿真环境 -->
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="world_name" value="$(arg world_name)" />
+        <arg name="debug" value="$(arg debug)" />
+        <arg name="gui" value="$(arg gui)" />
+        <arg name="paused" value="$(arg paused)"/>
+        <arg name="use_sim_time" value="$(arg use_sim_time)"/>
+        <arg name="headless" value="$(arg headless)"/>
+    </include>
+    <!-- 加载机器人模型描述参数 -->
+    <param name="robot_description" command="$(find xacro)/xacro --inorder 
+                             '$(find barrett_model)/robots/debug2_wam_7dof_wam_bhand.urdf.xacro'" /> 
+    <!-- 在gazebo中加载机器人模型-->
+    <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
+          args="-urdf -model mrobot -param robot_description  -x 0 -y 0 -z 0  -R 0.0 -P 0.0 -Y 0 "/> 
+
+
+
+
+
+<!-- (2)10.12.3关节状态控制器 -->
+    <!-- 运行joint_state_publisher节点，发布机器人的关节状态  -->
+    <!-- /arm/joint_states 来自gazebo的  joint_state_controller； 
+    joint_state_publisher将 /arm/joint_states转为了 /joint_states。两个topic的格式和内部信息是一样的，只是改了个名字。-->
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+        <param name="/use_gui" value="false"/> 
+        <rosparam param="/source_list">[/arm/joint_states]</rosparam>
+    </node>
+    
+    <!-- 运行robot_state_publisher节点，发布tf 。
+    robot_state_publisher接受的是joint_state_publisher发布的 /joint_states      -->
+    <!-- Given the published joint states, publish tf for the robot links -->
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="true" output="screen" />
+
+    <!--  运行joint_state_controller -->
+    <rosparam file="$(find wam_arm_moveit)/config/ros_controllers.yaml" command="load"/>
+    <node name="joint_controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
+          output="screen" ns="/arm" args="joint_state_controller" />
+    
+
+
+<!-- (3)10.12.1 关节轨迹控制器或位置（角度）控制器: ros_control trajectory control dof arm launch file . 原本是整合在gazebo.launch文件中-->
+    <!-- <include file="$(find wam_arm_moveit)/launch/ros_controllers.launch" /> -->
+      <!-- Load joint controller configurations from YAML file to parameter server -->
+        <rosparam file="$(find wam_arm_moveit)/config/ros_controllers.yaml" command="load"/>
+
+        <!-- Load the controllers -->
+        <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
+            output="screen"  ns="/arm"  args="arm_controller "/>
+
+
+
+<!-- (4)10.12.2  moveit控制器: moveit launch file. 启动move_group-->
+    <rosparam file="$(find wam_arm_moveit)/config/ros_controllers.yaml" command="load"/>
+    
+    <!-- Run the main MoveIt! executable without trajectory execution (we do not have controllers configured by default) -->
+    <include file="$(find wam_arm_moveit)/launch/move_group.launch">
+        <arg name="allow_trajectory_execution" value="true"/>
+        <arg name="fake_execution" value="false"/>
+        <arg name="info" value="true"/>
+        <arg name="debug" value="$(arg debug)"/>
+        <arg name="load_robot_description" value="$(arg load_robot_description)"/>
+    </include>
+
+
+    <!-- 启动名为 'publish_tf_world2robot' 的节点 -->
+    <node name="publish_tf_world2robot" pkg="gazebo_tf_broadcaster" type="publish_tf_world2robot" output="screen" />
+
+    
+    <!-- Run Rviz and load the default config to see the state of the move_group node -->
+    <!-- <include file="$(find wam_arm_moveit)/launch/moveit_rviz.launch">
+        <arg name="rviz_config" value="/home/robotlab/vp3d.rviz"/>
+        <arg name="debug" value="$(arg debug)"/>
+    </include> -->
+
+
+
+    
+    <!-- If database loading was enabled, start mongodb as well -->
+    <!-- <include file="$(find robot_hokuyo_kinectv1neck)/launch/default_warehouse_db.launch" if="$(arg db)">
+        <arg name="moveit_warehouse_database_path" value="$(arg db_path)"/>
+    </include> -->
+
+    <!-- <include file="$(find fabo_gazebo_navigation)/launch/fake_navigation.launch" >
+    </include> -->
+
+    <!-- 运行虚拟定位，兼容AMCL输出 -->
+    <!-- <node pkg="fake_localization" type="fake_localization" name="fake_localization" output="screen" /> -->
+
+    <!-- 对于虚拟定位，需要设置一个/odom与/map之间的静态坐标变换 -->
+    <!-- <node pkg="tf" type="static_transform_publisher" name="map_odom_broadcaster" args="0 0 0 0 0 0 /map /odom 100" /> -->
+</launch>

@@ -1,0 +1,15 @@
+
+
+<launch>
+
+    
+    <!-- Run Rviz and load the default config to see the state of the move_group node -->
+    <include file="$(find wam_arm_moveit)/launch/moveit_rviz.launch">
+        <!-- <arg name="rviz_config" value="$(find wam_arm_moveit)/launch/moveit.rviz"/> -->
+        <arg name="rviz_config" value="/home/robotlab/vp3d.rviz"/>
+
+    </include>
+
+
+
+</launch>

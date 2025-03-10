@@ -1,0 +1,12 @@
+<launch>
+  <!-- 启动Gazebo -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="paused" value="false"/> <!-- 启动时是否暂停仿真 -->
+    <arg name="use_sim_time" value="false"/> <!-- 使用仿真时间 -->
+    <arg name="gui" value="true"/> <!-- 是否启动Gazebo GUI -->
+    <arg name="headless" value="false"/> <!-- 是否为无头模式，对于服务器部署很有用 -->
+    <arg name="debug" value="false"/> <!-- 是否启动GDB调试 -->
+  </include>
+  
+
+</launch>
