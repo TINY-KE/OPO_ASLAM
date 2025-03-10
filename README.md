@@ -1,4 +1,4 @@
-# VP-SOM
+# Observation Pose Optimization 
 **Authors:** [Zhang Jiadong]
 
 Robot Observation Pose Optimization for Active Object SLAM with Ellipsoid Model and Camera Field of View.
